@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react'
 import personService from '/src/services/personService.js';
+import Notification from "./components/Notification.jsx";
 
 const Person = ({person, handleDeletion}) => {
     return (
@@ -41,6 +42,8 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState('')
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
 
 
     useEffect(() => {
@@ -76,8 +79,10 @@ const App = () => {
                         setPersons(newPersonList);
                         setNewName('');
                         setNewNumber('');
+                        setErrorMessage('');
+                        setSuccessMessage('Number Updated successfully');
                     })
-                    .catch(err => console.log("Failed", err));
+                    .catch(err => setErrorMessage(`Record has already been deleted: ${err}`));
 
             }else{
                 return false;
@@ -88,12 +93,14 @@ const App = () => {
         const newPerson = {name: newName, number: newNumber, id: persons.length + 1};
         personService.addNew(newPerson)
             .then(data => {
+                setErrorMessage('');
+                setSuccessMessage('New contact added successfully');
                 return setPersons([
                          ...persons,
                         data
                 ])
             })
-            .catch(err => console.log("Failed", err));
+            .catch(err => setErrorMessage(`Error occurred: ${err}`));
         setNewName('');
         setNewNumber('');
     }
@@ -107,7 +114,9 @@ const App = () => {
                     console.log(response);
                     const newPersonList = persons.filter((person) => person.id !== id);
                     setPersons(newPersonList);
-                });
+                    setErrorMessage('');
+                    setSuccessMessage('Contact record deleted successfully');
+                }).catch(err => setErrorMessage(`Record has already been deleted: ${err}`));
         }
 
     }
@@ -118,6 +127,8 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            { (successMessage.length >0) && <Notification message={successMessage} type="success"/>}
+            { (errorMessage.length >0) && <Notification message={errorMessage} type="error"/>}
             <Filter filter={filter} onChangeHandler={(e) => setFilter(e.target.value)}/>
 
             <PersonForm
