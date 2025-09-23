@@ -58,7 +58,30 @@ const App = () => {
         const alreadyExists = persons.filter((person) => person.name === newName);
 
         if(alreadyExists.length > 0){
-            alert(`${newName} is already in the phonebook`);
+            if(confirm(`${newName} is already in the phonebook, replace the old number with new one?`)){
+                const updatedPerson = {
+                    name: newName,
+                    number: newNumber,
+                    id: alreadyExists[0].id
+                }
+                personService.updatePerson(alreadyExists[0].id, updatedPerson)
+                    .then(data =>  {
+                        const newPersonList = persons.map((person) => {
+                            console.log(person);
+                            if(person.id === data.id){
+                                person.number = data.number;
+                            }
+                            return person;
+                        })
+                        setPersons(newPersonList);
+                        setNewName('');
+                        setNewNumber('');
+                    })
+                    .catch(err => console.log("Failed", err));
+
+            }else{
+                return false;
+            }
             return false;
         }
 
@@ -71,13 +94,6 @@ const App = () => {
                 ])
             })
             .catch(err => console.log("Failed", err));
-        const newId = `${persons.length + 1}`;
-
-        setPersons([
-                ...persons,
-                {name: newName, number: newNumber}
-        ]
-        );
         setNewName('');
         setNewNumber('');
     }
