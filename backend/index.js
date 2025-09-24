@@ -6,6 +6,7 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static('dist'))
 
 morgan.token('body', (req) => {
     return JSON.stringify(req.body)
@@ -15,7 +16,7 @@ app.use(morgan(':method :url :status - :response-time ms :body'))
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
     console.log('Path:  ', request.path)
-    console.log('Body:  ', request.body)
+    console.log('Body:  ', request.body ?? {})
     console.log('---')
     next()
 }
